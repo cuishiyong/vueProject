@@ -8,7 +8,7 @@
         </mt-navbar>
     </p>
     <div class="page-loadmore-wrapper" ref="wrapper" :style="{ height: wrapperHeight + 'px' }">
-      <mt-loadmore :top-method="loadTop" @top-status-change="handleTopChange" ref="loadmore">
+      <mt-loadmore :top-method="loadTop" @top-status-change="handleTopChange" :bottom-method="loadBottom" @bottom-status-change="handleBottomChange" :bottom-all-loaded="allLoaded" ref="loadmore">
         <ul class="page-loadmore-list">
           <li v-for="item in list" class="page-loadmore-listitem">
             <mt-tab-container  v-model="selected">
@@ -69,6 +69,12 @@
             <mt-spinner type="snake"></mt-spinner>
           </span>
         </div>
+        <div slot="bottom" class="mint-loadmore-bottom">
+          <span v-show="bottomStatus !== 'loading'" :class="{ 'is-rotate': bottomStatus === 'drop' }">↑</span>
+          <span v-show="bottomStatus === 'loading'">
+            <mt-spinner type="snake"></mt-spinner>
+          </span>
+        </div>
       </mt-loadmore>
     </div>
   </div>
@@ -81,6 +87,8 @@
       selected:"1",
         list: [],
         topStatus: '',
+        allLoaded: false,
+        bottomStatus: '',
         wrapperHeight: 0
       };
     },
@@ -97,6 +105,23 @@
             this.list.unshift(firstValue - i);
           }
           this.$refs.loadmore.onTopLoaded();
+        }, 1500);
+      },
+      handleBottomChange(status) {
+        this.bottomStatus = status;
+      },
+
+      loadBottom() {
+        setTimeout(() => {
+          let lastValue = this.list[this.list.length - 1];
+          if (lastValue < 40) {
+            for (let i = 1; i <= 10; i++) {
+              this.list.push(lastValue + i);
+            }
+          } else {
+            this.allLoaded = true;
+          }
+          this.$refs.loadmore.onBottomLoaded();
         }, 1500);
       }
     },
